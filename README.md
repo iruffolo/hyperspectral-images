@@ -13,4 +13,10 @@ channel using a rolling shutter.
 
 ![Simulated rolling shutter image](afun.png?raw=true "Afun")
 
+## Reconstruction using ADMM with TV prior
+
+    python main.py
+
+This runs ADMM using the total variation (TV) prior (can select anisotropic or isotropic)
+
 
