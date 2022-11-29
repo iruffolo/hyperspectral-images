@@ -14,7 +14,8 @@ def make_mask(img_size, start_row=0, extra_rows=0, stride=3):
         img_size: (height, width) of image to mask
         start_row: first row to be accepted (default 0)
         extra_rows: additional rows if mask wants to include consecutive rows
-        stride: number of rows to skip before taking next row
+        stride: number of rows to skip before taking next row (exluding the
+        extra_rows taken)
 
     Outputs:
         return: Image of size (height, width) with 1's in rows that are to be
@@ -85,9 +86,6 @@ if __name__=="__main__":
 
     ares = Afun(img)
     atres = Atfun(ares)
-
-    print(atres)
-    print(atres.shape)
 
     fig = plt.figure()
     ax = fig.add_subplot(121)

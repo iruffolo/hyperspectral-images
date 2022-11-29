@@ -19,9 +19,6 @@ from skimage.metrics import peak_signal_noise_ratio
 import matplotlib.pyplot as plt
 
 from admm_tv import *
-from admm_dncnn import *
-from leastnorm import *
-
 from amatrix import *
 
 # select target image and load it
@@ -29,10 +26,9 @@ img = io.imread('birds.png').astype(float)/255.
 
 # noise parameter - standard deviation
 sigma = 0.001
-sigma = 0.0
 
 # Simulated measurements
-b = Afun(img) #+ sigma * np.random.randn(N)
+b = Afun(img) + sigma * np.random.randn(img.shape[0], img.shape[1])
 
 # number of iterations for HQS/ADMM
 num_iters = 10
