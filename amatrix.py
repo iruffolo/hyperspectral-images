@@ -29,7 +29,7 @@ def make_mask(img_size, start_row=0, extra_rows=0, stride=3):
 
     return mask
 
-def Atfun(x, channels=3):
+def Atfun(x, channel=0, num_channels=3, extra=0):
     '''
     Calculates Atx where At is the transpose of the image formation matrix A,
     and x is an input image.
@@ -43,18 +43,16 @@ def Atfun(x, channels=3):
     '''
 
     # Number of hyperspectral channels
-    # channels = x.shape[2] if len(x.shape) > 2 else 1
+    mask = make_mask(x.shape, channel+channel*extra, extra, num_channels)
 
-    masks = [make_mask((x.shape[0],x.shape[1]), d, 0, channels)
-                for d in range(channels)]
+    # Transpose
+    mask = np.sum(mask, axis=0)
 
-    # Stack masks into np array
-    masks = np.stack(masks, axis=2)
-
-    return masks * x[:,:,np.newaxis]
+    # Sum mask with x
+    return mask * x
 
 
-def Afun(x):
+def Afun(x, channel=0, num_channels=3, extra=0):
     '''
     Calculates Ax where A is the image formation matrix, and x is an input
     image.
@@ -66,31 +64,49 @@ def Afun(x):
     return: New image of size (height, width) sampled from the d channels of x
     '''
 
-    # Number of hyperspectral channels
-    channels = x.shape[2] if len(x.shape) > 2 else 1
-
-    masks = [make_mask((x.shape[0],x.shape[1]), d, 0, channels)
-                for d in range(channels)]
-
-    # Stack masks into np array
-    masks = np.stack(masks, axis=2)
+    # Create mask
+    mask = make_mask(x.shape, channel+channel*extra, extra, num_channels)
 
     # Mupltiply each image with its corresponding mask, then sum all masked
     # images into final image.
-    return np.sum(masks * x, axis=2)
+    return mask * x
+
+
+def SimulateImage(img, num_channels, sigma=0.001, e=0):
+    '''
+    Helper function to create a simulated image
+    '''
+
+    # Create a mask for each channel and stack them together
+    channels = [Afun(img[:,:,c], c, num_channels, e)
+            for c in range(num_channels)]
+    channels = np.stack(channels, axis=2)
+
+    # Add noise
+    channels += sigma*np.random.randn(img.shape[0], img.shape[1], num_channels)
+
+    return channels
 
 
 if __name__=="__main__":
 
     img = io.imread('birds.png').astype(float)/255.
 
-    ares = Afun(img)
-    atres = Atfun(ares)
+    img = img[:,:,0]
 
-    fig = plt.figure()
-    ax = fig.add_subplot(121)
-    ax.imshow(ares, cmap="gray", vmin=0.0, vmax=1.0)
-    ax = fig.add_subplot(122)
-    ax.imshow(atres, cmap="gray", vmin=0.0, vmax=1.0)
-    plt.show()
+    c = 0
+    n = 3
+    e = int(img.shape[1]/n)
+
+    for c in range(3):
+
+        ares = Afun(img, c, n, e)
+        atres = Atfun(ares, c, n, e)
+
+        fig = plt.figure()
+        ax = fig.add_subplot(121)
+        ax.imshow(ares, cmap="gray", vmin=0.0, vmax=1.0)
+        ax = fig.add_subplot(122)
+        ax.imshow(atres, cmap="gray", vmin=0.0, vmax=1.0)
+        plt.show()
 

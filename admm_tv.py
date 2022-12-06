@@ -12,12 +12,13 @@ from tqdm import tqdm
 # this function implements the finite differences method
 from finite_differences import *
 
-def admm_tv(b, Afun, Atfun, lam, rho, num_iters, imageResolution, anisotropic_tv=True):
+def admm_tv(b, Afun, Atfun, lam, rho, num_iters, imageResolution,
+        c=0, num_c=3, e=0, anisotropic_tv=True):
 
     # initialize x,z,u with all zeros
     x = np.zeros(imageResolution)
-    z = np.zeros((2, imageResolution[0], imageResolution[1], imageResolution[2]))
-    u = np.zeros((2, imageResolution[0], imageResolution[1], imageResolution[2]))
+    z = np.zeros((2, imageResolution[0], imageResolution[1]))
+    u = np.zeros((2, imageResolution[0], imageResolution[1]))
 
     for it in tqdm(range(num_iters)):
 
@@ -41,19 +42,14 @@ def admm_tv(b, Afun, Atfun, lam, rho, num_iters, imageResolution, anisotropic_tv
         #   versions for the function handles you pass into cg and then reshape
         #   the result to a 2D image again after.
 
-        # tst = opDx(x)
-        # print(tst.shape)
-        # tst2 = opDtx(tst)
-        # print(tst2.shape)
-
         def mv(x):
             xmat = x.reshape(imageResolution)
-            return Atfun(Afun(xmat)) + rho*opDtx(opDx(xmat))
+            return Atfun(Afun(xmat, c, num_c, e), c, num_c, e) + rho*opDtx(opDx(xmat))
 
         size = x.size
         Atilde = LinearOperator(shape=(size,size), matvec=mv)
 
-        btilde = Atfun(b) + rho*opDtx(v)
+        btilde = Atfun(b, c, num_c) + rho*opDtx(v)
         btilde = btilde.reshape(size)
 
         # print(f"shape b = {btilde.shape}")

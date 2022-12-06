@@ -11,17 +11,14 @@ def opDtx_(diffx, axis):
     return Dtx
 
 def opDx(x):
-    Dx = opDx_(x, axis=-2)
-    Dy = opDx_(x, axis=-3)
+    Dx = opDx_(x, axis=-1)
+    Dy = opDx_(x, axis=-2)
     if len(Dx.shape) <= 3:
-        # return np.stack((Dx, Dy), axis=-3)
-        return np.stack((Dx, Dy), axis=-4)
+        return np.stack((Dx, Dy), axis=-3)
     else:
         return np.concatenate((Dx, Dy), axis=-2)
 
 def opDtx(x):
-    Dtx = opDtx_(x[0,:, :, :], axis=-2)
-    # Dtx = opDtx_(x[..., 0, :, :], axis=-1)
-    Dty = opDtx_(x[1,:, :, :], axis=-3)
-    # Dtx = opDtx_(x[..., 1, :, :], axis=-1)
+    Dtx = opDtx_(x[..., 0, :, :], axis=-1)
+    Dty = opDtx_(x[..., 1, :, :], axis=-2)
     return Dtx + Dty
