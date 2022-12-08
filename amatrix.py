@@ -36,16 +36,14 @@ def Atfun(x, channel=0, num_channels=3, extra=0):
 
     Inputs:
     x: Image of size (height, width)
-    channels: Number of channels in the original image
+    channel: Which channel number
 
     Outputs:
     return: New image of size (height, width, channels)
     '''
 
-    # Number of hyperspectral channels
+    # Create mask and transpose
     mask = make_mask(x.shape, channel+channel*extra, extra, num_channels)
-
-    # Transpose
     mask = np.sum(mask, axis=0)
 
     # Sum mask with x
